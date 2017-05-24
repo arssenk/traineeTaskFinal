@@ -3,8 +3,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ManagementSystem {
-    private Map<Date, List<ItemSpecification>> dateMap;
-
+    private Map<Date, List<Item>> dateMap;
+    private boolean condition;
     ManagementSystem() {
         this.dateMap = new HashMap<>();
     }
@@ -12,24 +12,24 @@ public class ManagementSystem {
     public static void main(String[] args) {
         ManagementSystem general = new ManagementSystem();
         List<String> lst;
-        boolean condition = true;
-        while (condition) {
+        general.condition = true;
+        while (general.condition) {
             System.out.print("Enter your command: ");
             Scanner scanner = new Scanner(System.in);
-            lst = new ArrayList<String>();
+            lst = new ArrayList<>();
             Collections.addAll(lst, scanner.nextLine().split(" "));
             general.parseInput(lst);
         }
     }
 
-    public Map<Date, List<ItemSpecification>> getDateMap() {
+    public Map<Date, List<Item>> getDateMap() {
         return dateMap;
     }
 
     public void parseInput(List<String> input) {
         switch (input.get(0)) {
             case "add":
-                addItem(parseInputIntoItem(input.subList(1, input.size())));
+                if (parseInputIntoItem(input.subList(1, input.size())) != null) addItem(parseInputIntoItem(input.subList(1, input.size())));
                 break;
             case "list":
                 printItems();
@@ -43,17 +43,27 @@ public class ManagementSystem {
                    // e.printStackTrace(); Не знаю чи треба виводити!
                 }
                 break;
+            case "exit":
+                System.out.println("Shutting down");
+                condition = false;
+                break;
             default:
-                System.out.println(String.format("Input is not defined: %s.", input.get(0)));
+                System.out.println("Input is not valid.");
         }
 
     }
 
-    private ItemSpecification parseInputIntoItem(List<String> lst) {
-        if (lst.size() >= 3) return new ItemSpecification(lst.get(0), lst.get(1),
-                lst.get(2), String.join(" ", lst.subList(3, lst.size())));
+    private Item parseInputIntoItem(List<String> lst) {
+        if (lst.size() >= 4) {
+            Item newItem = Item.createItem(lst.get(0), lst.get(1),
+                    lst.get(2), String.join(" ", lst.subList(3, lst.size())));
+            if (newItem!= null) {
+                return newItem;
+            }
+            else return null;
+        }
         else {
-            System.out.println("Number of parameters mismatch in add func.");
+            System.out.println("Number of parameters mismatch.");
             return null;
         }
     }
@@ -63,21 +73,21 @@ public class ManagementSystem {
         Collections.sort(dateList);
         for (Date date : dateList) {
             String value = "";
-            for (ItemSpecification item : dateMap.get(date)) value += item.toString() + "\n";
+            for (Item item : dateMap.get(date)) value += item.toString() + "\n";
             System.out.println(new SimpleDateFormat("yyyy-MM-dd").format(date) + "\n" + value);
         }
     }
 
-    private void addItem(ItemSpecification item) {
-        List<ItemSpecification> myList;
-        if (dateMap.get(item.getDate()) != null) {
-            myList = dateMap.get(item.getDate());
+    private void addItem(Item item) {
+        List<Item> myList;
+        if (dateMap.get(item.getItemDate()) != null) {
+            myList = dateMap.get(item.getItemDate());
             myList.add(item);
-            dateMap.put(item.getDate(), myList);
+            dateMap.put(item.getItemDate(), myList);
         } else {
             myList = new ArrayList<>();
             myList.add(item);
-            dateMap.put(item.getDate(), myList);
+            dateMap.put(item.getItemDate(), myList);
         }
         printItems();
     }

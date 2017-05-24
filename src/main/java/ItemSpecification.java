@@ -13,6 +13,7 @@ public class ItemSpecification implements Comparable<ItemSpecification> {
     private String currency;
     private String productName;
 
+
     ItemSpecification(String date, String money, String currency, String productName) {
 
         this.date = parseDate(date);
