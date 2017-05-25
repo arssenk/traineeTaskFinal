@@ -14,6 +14,8 @@ import java.util.Map;
  * This class provides tools to work with currency. Implements Singleton.
  */
 
+
+//Not sure in Singleton(Itinialige a lot ot times) and call getBase func a lot of times.
 public class CurrencyChecker {
     private static Map<String, Double> currensies;
     private static CurrencyChecker instance;

@@ -46,6 +46,7 @@ class Item {
         itemCurrency = currency;
         itemName = productName;
     }
+    //------Це норм якщо статіком?
     private static Date parseDate(String dateSample) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -56,6 +57,7 @@ class Item {
             //e.printStackTrace(); Не знею чи треба виводити.
         }
     }
+
     private static String parseCurrency(String curr){
         Map<String, Double> currentCurrencies = CurrencyChecker.getInstance().getBaseCurrencies();
         if (currentCurrencies.containsKey(curr.toUpperCase())) return curr.toUpperCase();
