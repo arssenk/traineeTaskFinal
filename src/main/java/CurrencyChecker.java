@@ -18,9 +18,6 @@ public class CurrencyChecker {
     private static Map<String, Double> currensies;
     private static CurrencyChecker instance;
 
-    private CurrencyChecker() {
-
-    }
 
     public static synchronized CurrencyChecker getInstance() {
         if (instance == null) {
@@ -29,7 +26,7 @@ public class CurrencyChecker {
         return instance;
     }
 
-    static Map<String, Double> getCurrencies() {
+    Map<String, Double> getBaseCurrencies() {
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpGet getRequest = new HttpGet(

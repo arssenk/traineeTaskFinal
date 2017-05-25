@@ -5,6 +5,7 @@ import java.util.*;
 public class ManagementSystem {
     private Map<Date, List<Item>> dateMap;
     private boolean condition;
+
     ManagementSystem() {
         this.dateMap = new HashMap<>();
     }
@@ -29,7 +30,9 @@ public class ManagementSystem {
     public void parseInput(List<String> input) {
         switch (input.get(0)) {
             case "add":
-                if (parseInputIntoItem(input.subList(1, input.size())) != null) addItem(parseInputIntoItem(input.subList(1, input.size())));
+                Item item = parseInputIntoItem(input.subList(1, input.size()));
+                if (item != null)
+                    addItem(item);
                 break;
             case "list":
                 printItems();
@@ -40,8 +43,14 @@ public class ManagementSystem {
                     else System.out.println("No args in clear");
                 } catch (ParseException e) {
                     System.out.println("You've inputted the wrong date");
-                   // e.printStackTrace(); Не знаю чи треба виводити!
+                    // e.printStackTrace(); Не знаю чи треба виводити!
                 }
+                break;
+            case "total":
+                if (input.size() == 2) total(input.get(1));
+                else if (input.size() < 2) System.out.println("No currency found");
+                else System.out.println("Wrong input. Can't recognize currency: " +
+                            input.subList(1, input.size()).toString().replace("[", "").replace("]", ""));
                 break;
             case "exit":
                 System.out.println("Shutting down");
@@ -57,12 +66,10 @@ public class ManagementSystem {
         if (lst.size() >= 4) {
             Item newItem = Item.createItem(lst.get(0), lst.get(1),
                     lst.get(2), String.join(" ", lst.subList(3, lst.size())));
-            if (newItem!= null) {
+            if (newItem != null) {
                 return newItem;
-            }
-            else return null;
-        }
-        else {
+            } else return null;
+        } else {
             System.out.println("Number of parameters mismatch.");
             return null;
         }
@@ -93,8 +100,32 @@ public class ManagementSystem {
     }
 
     void clear(Date date) {
-        dateMap.remove(date);
-        printItems();
+        if (dateMap.containsKey(date)) {
+            dateMap.remove(date);
+            printItems();
+        } else System.out.println("There is no such date in list.");
+    }
+
+    Double total(String curr) {
+        CurrencyChecker currencyTools = CurrencyChecker.getInstance();
+        Map<String, Double> currentCurrency = currencyTools.getBaseCurrencies();
+        Double total = 0.0;
+        //Check for currency validness
+        if (currentCurrency.keySet().contains(curr.toUpperCase())) {
+            for (Date itemDate : dateMap.keySet()) {
+                for (Item itm : dateMap.get(itemDate)) {
+                    System.out.println(String.format("Curr: %s, item money: %s", itm.getItemCurrency(), itm.getItemMoney()));
+//                    System.out.println(currentCurrency.get("USD"));
+                    total += itm.getItemMoney() * currentCurrency.get(curr.toUpperCase())
+                            / currentCurrency.get(itm.getItemCurrency());
+                }
+            }
+            System.out.printf("Value: %.2f\n", total);
+            return total;
+        } else {
+            System.out.println("Your currency is not valid.");
+        }
+        return null;
     }
 }
 
