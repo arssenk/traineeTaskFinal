@@ -15,7 +15,7 @@ public class ManagementSystem {
         List<String> lst;
         general.condition = true;
         while (general.condition) {
-            System.out.print("Enter your command: ");
+            System.out.print("> ");
             Scanner scanner = new Scanner(System.in);
             lst = new ArrayList<>();
             Collections.addAll(lst, scanner.nextLine().split(" "));
@@ -23,11 +23,12 @@ public class ManagementSystem {
         }
     }
 
-    public Map<Date, List<Item>> getDateMap() {
+    Map<Date, List<Item>> getDateMap() {
         return dateMap;
     }
 
-    public void parseInput(List<String> input) {
+    //Parsing input.
+    void parseInput(List<String> input) {
         switch (input.get(0)) {
             case "add":
                 Item item = parseInputIntoItem(input.subList(1, input.size()));
@@ -35,7 +36,7 @@ public class ManagementSystem {
                     addItem(item);
                 break;
             case "list":
-                printItems();
+                System.out.println(printItems());
                 break;
             case "clear":
                 try {
@@ -43,7 +44,6 @@ public class ManagementSystem {
                     else System.out.println("No args in clear");
                 } catch (ParseException e) {
                     System.out.println("You've inputted the wrong date");
-                    // e.printStackTrace(); Не знаю чи треба виводити!
                 }
                 break;
             case "total":
@@ -62,6 +62,7 @@ public class ManagementSystem {
 
     }
 
+    //Creating and returning item out of input. If input is not valid, returns null.
     private Item parseInputIntoItem(List<String> lst) {
         if (lst.size() >= 4) {
             Item newItem = Item.createItem(lst.get(0), lst.get(1),
@@ -75,16 +76,20 @@ public class ManagementSystem {
         }
     }
 
-    private void printItems() {
+    //Prints all items that was added by now.
+    String printItems() {
         ArrayList<Date> dateList = new ArrayList<>(dateMap.keySet());
         Collections.sort(dateList);
+        String result = "";
         for (Date date : dateList) {
             String value = "";
             for (Item item : dateMap.get(date)) value += item.toString() + "\n";
-            System.out.println(new SimpleDateFormat("yyyy-MM-dd").format(date) + "\n" + value);
+            result += new SimpleDateFormat("yyyy-MM-dd").format(date) + "\n" + value;
         }
+        return result;
     }
 
+    //Add items to main structure.
     private void addItem(Item item) {
         List<Item> myList;
         if (dateMap.get(item.getItemDate()) != null) {
@@ -96,35 +101,35 @@ public class ManagementSystem {
             myList.add(item);
             dateMap.put(item.getItemDate(), myList);
         }
-        printItems();
+        System.out.println(printItems());
     }
 
+    //Clear all expenses that were made in particular date.
     void clear(Date date) {
         if (dateMap.containsKey(date)) {
             dateMap.remove(date);
-            printItems();
+            System.out.println(printItems());
         } else System.out.println("There is no such date in list.");
     }
 
+    //Returns amount of money that were spent in particular currency. Return null if currency is not valid.
     Double total(String curr) {
         CurrencyChecker currencyTools = CurrencyChecker.getInstance();
         Map<String, Double> currentCurrency = currencyTools.getBaseCurrencies();
         Double total = 0.0;
         //Check for currency validness
-        if (currentCurrency.keySet().contains(curr.toUpperCase())) {
+        if (currentCurrency != null && currentCurrency.keySet().contains(curr.toUpperCase())) {
             for (Date itemDate : dateMap.keySet()) {
                 for (Item itm : dateMap.get(itemDate)) {
-                    System.out.println(String.format("Curr: %s, item money: %s", itm.getItemCurrency(), itm.getItemMoney()));
-//                    System.out.println(currentCurrency.get("USD"));
                     total += itm.getItemMoney() * currentCurrency.get(curr.toUpperCase())
                             / currentCurrency.get(itm.getItemCurrency());
                 }
             }
-            System.out.printf("Value: %.2f\n", total);
-            return total;
-        } else {
-            System.out.println("Your currency is not valid.");
+            System.out.printf("%.2f %s\n", total, curr.toUpperCase());
+            return Math.round(total * 100d) / 100d;
         }
+        else if (currentCurrency == null) System.out.println("Can't get currencies");
+        else  System.out.println("Your currency is not valid.");
         return null;
     }
 }

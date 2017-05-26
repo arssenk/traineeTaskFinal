@@ -1,9 +1,9 @@
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
+import java.util.Set;
 
-//Static factory pattern
+//Static factory pattern. Class providing item configuration and tools to work with item.
 
 class Item {
 
@@ -12,18 +12,18 @@ class Item {
     private String itemCurrency;
     private String itemName;
 
-    public Date getItemDate() {
+    Date getItemDate() {
         return itemDate;
     }
 
-    public Double getItemMoney() {
+    Double getItemMoney() {
         return itemMoney;
     }
-    public String getItemCurrency() {
+    String getItemCurrency() {
         return itemCurrency;
     }
 
-    public static Item createItem(String date, String money, String currency, String productName) {
+    static Item createItem(String date, String money, String currency, String productName) {
         Date itemDate = parseDate(date);
         String itemCurrency = parseCurrency(currency);
         String itemName = productName.replaceAll("[-+.^:,“”\"]","");
@@ -46,7 +46,7 @@ class Item {
         itemCurrency = currency;
         itemName = productName;
     }
-    //------Це норм якщо статіком?
+//Checking for validness of date.
     private static Date parseDate(String dateSample) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -54,13 +54,13 @@ class Item {
         } catch (ParseException e) {
             System.out.println("Error in parsing date");
             return null;
-            //e.printStackTrace(); Не знею чи треба виводити.
         }
     }
 
+//Checking for validness of currency.
     private static String parseCurrency(String curr){
-        Map<String, Double> currentCurrencies = CurrencyChecker.getInstance().getBaseCurrencies();
-        if (currentCurrencies.containsKey(curr.toUpperCase())) return curr.toUpperCase();
+        Set<String> currentCurrencies = CurrencyChecker.currencyTypes();
+        if (currentCurrencies.contains(curr.toUpperCase())) return curr.toUpperCase();
         System.out.println("Wrong currency");
         return null;
     }

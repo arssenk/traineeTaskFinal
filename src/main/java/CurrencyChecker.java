@@ -9,25 +9,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * This class provides tools to work with currency. Implements Singleton.
+ * This class provides current currency using fixer.io as a resource. Implements Singleton pattern.
  */
 
 
-//Not sure in Singleton(Itinialige a lot ot times) and call getBase func a lot of times.
-public class CurrencyChecker {
-    private static Map<String, Double> currensies;
+
+class CurrencyChecker {
+    private static Map<String, Double> currencies;
     private static CurrencyChecker instance;
 
 
-    public static synchronized CurrencyChecker getInstance() {
+    static synchronized CurrencyChecker getInstance() {
         if (instance == null) {
             instance = new CurrencyChecker();
         }
         return instance;
     }
 
+//Get currency list with base of EUR. In order to work needs internet connection.
     Map<String, Double> getBaseCurrencies() {
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -47,17 +49,23 @@ public class CurrencyChecker {
             //Parsing JSON
 
             JSONObject dataObj = new JSONObject(data).getJSONObject("rates");
-            currensies = new HashMap<>();
-            currensies.put("EUR", 1.0);
+            currencies = new HashMap<>();
+            currencies.put("EUR", 1.0);
             for (int i = 0; i < dataObj.names().length(); ++i)
-                currensies.put(dataObj.names().get(i).toString(),
+                currencies.put(dataObj.names().get(i).toString(),
                         (Double) dataObj.get(dataObj.names().get(i).toString()));
 
             httpClient.getConnectionManager().shutdown();
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            System.out.println("There is problem with getting the current currencies.\n" +
+                    "Please check your internet connection");
+            return null;
         }
-        return currensies;
+        return currencies;
+    }
+    static Set<String> currencyTypes(){
+        if (currencies == null) getInstance().getBaseCurrencies();
+        return CurrencyChecker.currencies.keySet();
     }
 }
 
